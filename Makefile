@@ -3,7 +3,6 @@ MBINARY=migrator
 USBINARY=url-shortener
 MIGRATIONS_PATH=migrations/
 MIGRATIONS_TABLE=migrations
-#DB_CONNECTION_STRING?="host=localhost port=5432 dbname=url_shortener user=postgres password=postgres sslmode=disable"
 
 deps:
 	go mod tidy
@@ -16,10 +15,10 @@ build-us:
 
 # Применение миграций через бинарник
 migrate-up: build-m
-	./$(MBINARY) -connection-string=$(DB_DB_CONNECTION_STRING) -migrations-path=$(MIGRATIONS_PATH)
+	./$(MBINARY) -connection-string="$(DB_CONNECTION_STRING)" -migrations-path=$(MIGRATIONS_PATH)
 
 migrate-down: build-m
-	./$(MBINARY) -connection-string=$(DB_DB_CONNECTION_STRING) -migrations-path=$(MIGRATIONS_PATH) down
+	./$(MBINARY) -connection-string="$(DB_CONNECTION_STRING)" -migrations-path=$(MIGRATIONS_PATH) down
 
 # Создание новой миграции с именем NAME
 create-migration:
@@ -30,15 +29,15 @@ endif
 
 # Применение миграций напрямую через goose
 migr-up:
-	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres $(DB_CONNECTION_STRING) up
+	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres "$(DB_CONNECTION_STRING)" up
 
 # Откат миграции через goose
 migr-down:
-	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres $(DB_CONNECTION_STRING) down
+	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres "$(DB_CONNECTION_STRING)" down
 
 # Статус миграций
 migr-status:
-	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres $(DB_CONNECTION_STRING) status
+	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres "$(DB_CONNECTION_STRING)" status
 
 clean-m:
 	rm -f $(MBINARY)
