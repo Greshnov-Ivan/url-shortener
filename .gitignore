@@ -5,6 +5,8 @@
 *.a
 *.so
 *.dll
+/migrator
+/url-shortener
 
 # Exclude temporary files and logs
 *.log
