@@ -1,0 +1,83 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "REST API для сервиса сокращения ссылок.",
+        "title": "URL Shortener API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/links": {
+            "post": {
+                "description": "Принимает длинный URL и возвращает сокращенный URL",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "links"
+                ],
+                "summary": "Создание короткой ссылки",
+                "parameters": [
+                    {
+                        "description": "Данные запроса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shorten.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с сокращенной ссылкой",
+                        "schema": {
+                            "$ref": "#/definitions/shorten.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "shorten.Request": {
+            "type": "object",
+            "required": [
+                "sourceUrl"
+            ],
+            "properties": {
+                "expiresAt": {
+                    "type": "string"
+                },
+                "sourceUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "shorten.Response": {
+            "type": "object",
+            "properties": {
+                "shortUrl": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

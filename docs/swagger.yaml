@@ -1,0 +1,54 @@
+basePath: /
+definitions:
+  shorten.Request:
+    properties:
+      expiresAt:
+        type: string
+      sourceUrl:
+        type: string
+    required:
+    - sourceUrl
+    type: object
+  shorten.Response:
+    properties:
+      shortUrl:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API для сервиса сокращения ссылок.
+  title: URL Shortener API
+  version: "1.0"
+paths:
+  /links:
+    post:
+      consumes:
+      - application/json
+      description: Принимает длинный URL и возвращает сокращенный URL
+      parameters:
+      - description: Данные запроса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shorten.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с сокращенной ссылкой
+          schema:
+            $ref: '#/definitions/shorten.Response'
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Создание короткой ссылки
+      tags:
+      - links
+swagger: "2.0"
