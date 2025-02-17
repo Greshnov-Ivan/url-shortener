@@ -13,11 +13,10 @@
 *.tmp
 *.test
 coverage.out
+*.swp
 
-# Exclude dependency directories and the Go
+# Exclude dependency directories and the Go build cache
 /vendor/
-*.mod
-/go/
 bin/
 pkg/
 build/
@@ -28,7 +27,7 @@ config/*.yaml
 config/*.json
 secrets.*
 
-# Exclude IDE files and systems
+# Exclude IDE files and system files
 .vscode/
 .idea/
 *.iml
