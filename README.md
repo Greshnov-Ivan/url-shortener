@@ -30,7 +30,13 @@ go mod tidy
 
 ### Configure environment
 
-Specify the path (you can use config/local.yaml) to your configuration file in the environment variables (do not forget to update it by specifying your credentials for the database):
+- Copy the example configuration file and update it with your database credentials and salt for hash_id_configuration:
+
+```sh
+cp config/local.yaml.example config/local.yaml
+```
+
+- Specify the path (you can use config/local.yaml) to your configuration file in the environment variables:
 
 ```sh
 export CONFIG_PATH=./config/local.yaml
@@ -38,13 +44,13 @@ export CONFIG_PATH=./config/local.yaml
 
 ### Run database migrations
 
-Set the DB connection string in the environment variables:
+- Set the DB connection string in the environment variables:
 
 ```sh
 export DB_CONNECTION_STRING="host=localhost port=5432 dbname=url_shortener user=yourName password=yourPassword sslmode=disable"
 ```
 
-Run migrator:
+- Run migrator:
 
 ```sh
 make migrate-up
