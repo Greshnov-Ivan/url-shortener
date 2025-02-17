@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
 	"time"
-	"url-shortener/internal/entity"
 	"url-shortener/internal/lib/reflecthelper"
+	"url-shortener/internal/repository/dto"
 	"url-shortener/internal/repository/reperrors"
 	"url-shortener/internal/service/serverrors"
 )
@@ -19,8 +19,8 @@ type Hashing interface {
 
 type LinkRepository interface {
 	CreateLink(ctx context.Context, sourceUrl string, expiresAt *time.Time) (int64, error)
-	GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*entity.Link, error)
-	GetLinkById(ctx context.Context, id int64) (*entity.Link, error)
+	GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*dto.LinkDTO, error)
+	GetLinkById(ctx context.Context, id int64) (*dto.LinkDTO, error)
 	UpdateLastRequested(ctx context.Context, id int64) error
 	UpdateExpires(ctx context.Context, id int64, expires_at *time.Time) error
 }
@@ -36,7 +36,7 @@ func NewUrlShortenerService(log *slog.Logger, hash Hashing, repo LinkRepository)
 
 func (s *UrlShortenerService) Shorten(ctx context.Context, sourceUrl string, expiresAt *time.Time) (string, error) {
 	var linkId int64
-	link, err := s.repo.GetLinkBySourceUrl(ctx, sourceUrl)
+	linkDTO, err := s.repo.GetLinkBySourceUrl(ctx, sourceUrl)
 	if err != nil {
 		if !errors.Is(err, reperrors.ErrLinkNotFound) {
 			return "", err
@@ -51,6 +51,7 @@ func (s *UrlShortenerService) Shorten(ctx context.Context, sourceUrl string, exp
 			return "", err
 		}
 	} else {
+		link := dto.MapDTOToLink(linkDTO)
 		linkId = link.ID
 
 		// Существующую ссылку допускается сделать просроченной, проверка на expired исключена.
@@ -79,13 +80,14 @@ func (s *UrlShortenerService) Resolve(ctx context.Context, code string) (string,
 	if id == 0 {
 		return "", errors.New("invalid code")
 	}
-	link, err := s.repo.GetLinkById(ctx, id)
+	linkDTO, err := s.repo.GetLinkById(ctx, id)
 	if err != nil {
 		if errors.Is(err, reperrors.ErrLinkNotFound) {
 			return "", serverrors.ErrURLNotFound
 		}
 		return "", err
 	}
+	link := dto.MapDTOToLink(linkDTO)
 	err = s.repo.UpdateLastRequested(ctx, id)
 	if err != nil {
 		log.Error("failed to update last requested", slog.Any("error", err))

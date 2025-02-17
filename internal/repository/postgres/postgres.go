@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"url-shortener/internal/entity"
+	"url-shortener/internal/repository/dto"
 	"url-shortener/internal/repository/reperrors"
 
 	_ "github.com/lib/pq"
@@ -24,7 +24,6 @@ func (r *Repository) CloseDB() error {
 	return r.db.Close()
 }
 
-// реализовать интерфейс сканера type Scanner
 func (r *Repository) CreateLink(ctx context.Context, sourceUrl string, expiresAt *time.Time) (int64, error) {
 	query := `INSERT INTO links (source_url, expires_at, created_at) VALUES ($1, $2, $3) RETURNING id`
 	nowUtc := time.Now().UTC()
@@ -36,9 +35,9 @@ func (r *Repository) CreateLink(ctx context.Context, sourceUrl string, expiresAt
 	return id, nil
 }
 
-func (r *Repository) GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*entity.Link, error) {
+func (r *Repository) GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*dto.LinkDTO, error) {
 	query := "SELECT id, source_url, expires_at, created_at, last_requested_at FROM links WHERE source_url = $1"
-	link := &entity.Link{}
+	link := &dto.LinkDTO{}
 	err := r.db.QueryRowContext(ctx, query, sourceUrl).Scan(&link.ID, &link.SourceUrl, &link.ExpiresAt, &link.CreatedAt, &link.LastRequestedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, reperrors.ErrLinkNotFound
@@ -49,9 +48,9 @@ func (r *Repository) GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (
 	return link, nil
 }
 
-func (r *Repository) GetLinkById(ctx context.Context, id int64) (*entity.Link, error) {
+func (r *Repository) GetLinkById(ctx context.Context, id int64) (*dto.LinkDTO, error) {
 	query := "SELECT id, source_url, expires_at, created_at, last_requested_at FROM links WHERE id = $1"
-	link := &entity.Link{}
+	link := &dto.LinkDTO{}
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&link.ID, &link.SourceUrl, &link.ExpiresAt, &link.CreatedAt, &link.LastRequestedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, reperrors.ErrLinkNotFound

@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 	time "time"
-	entity "url-shortener/internal/entity"
+	dto "url-shortener/internal/repository/dto"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -105,10 +105,10 @@ func (mr *MockLinkRepositoryMockRecorder) CreateLink(ctx, sourceUrl, expiresAt i
 }
 
 // GetLinkById mocks base method.
-func (m *MockLinkRepository) GetLinkById(ctx context.Context, id int64) (*entity.Link, error) {
+func (m *MockLinkRepository) GetLinkById(ctx context.Context, id int64) (*dto.LinkDTO, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLinkById", ctx, id)
-	ret0, _ := ret[0].(*entity.Link)
+	ret0, _ := ret[0].(*dto.LinkDTO)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -120,10 +120,10 @@ func (mr *MockLinkRepositoryMockRecorder) GetLinkById(ctx, id interface{}) *gomo
 }
 
 // GetLinkBySourceUrl mocks base method.
-func (m *MockLinkRepository) GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*entity.Link, error) {
+func (m *MockLinkRepository) GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*dto.LinkDTO, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLinkBySourceUrl", ctx, sourceUrl)
-	ret0, _ := ret[0].(*entity.Link)
+	ret0, _ := ret[0].(*dto.LinkDTO)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

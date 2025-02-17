@@ -113,9 +113,13 @@ url-shortener/
 │   │── config/          # Configuration structure
 │   │── entity/          # Domain entities and data structures
 │   │── http/            # HTTP layer (handlers, middleware)
+│   │   │── dto/         # Data Transfer Objects for HTTP requests and responses 
+│   │   │── handlers/    # Route handlers for processing requests
+│   │   │── middleware/  # Middleware functions
 │   │── lib/             # Utility and helper functions
 │   │── mocks/           # Auto-generated mock files for testing
 │   │── repository/      # Database access layer
+│   │   │── dto/         # Data Transfer Objects for database interactions 
 │   │── service/         # Business logic and application rules (there are unit tests)
 │── migrations/          # Database migration files
 │── tests/               # Functional tests

@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 	"url-shortener/internal/lib/logger/handlers/slogdiscard"
+	"url-shortener/internal/repository/dto"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"url-shortener/internal/entity"
 	"url-shortener/internal/mocks"
 	"url-shortener/internal/repository/reperrors"
 	"url-shortener/internal/service"
@@ -76,7 +76,7 @@ func TestShorten(t *testing.T) {
 			sourceURL: url,
 			expiresAt: &future,
 			mockRepo: func(repo *mocks.MockLinkRepository) {
-				repo.EXPECT().GetLinkBySourceUrl(gomock.Any(), gomock.Eq(url)).Return(&entity.Link{ID: id, SourceUrl: url}, nil)
+				repo.EXPECT().GetLinkBySourceUrl(gomock.Any(), gomock.Eq(url)).Return(&dto.LinkDTO{ID: id, SourceUrl: url}, nil)
 				repo.EXPECT().UpdateExpires(gomock.Any(), gomock.Eq(int64(id)), gomock.Eq(&future)).Return(nil).Times(1)
 			},
 			mockHash: func(hash *mocks.MockHashing) {
@@ -122,7 +122,7 @@ func TestResolve(t *testing.T) {
 				hash.EXPECT().DecodeInt64WithError(gomock.Eq(code)).Return([]int64{id}, nil)
 			},
 			mockRepo: func(repo *mocks.MockLinkRepository) {
-				repo.EXPECT().GetLinkById(gomock.Any(), gomock.Eq(int64(id))).Return(&entity.Link{ID: id, SourceUrl: url}, nil)
+				repo.EXPECT().GetLinkById(gomock.Any(), gomock.Eq(int64(id))).Return(&dto.LinkDTO{ID: id, SourceUrl: url}, nil)
 				repo.EXPECT().UpdateLastRequested(gomock.Any(), gomock.Eq(int64(id))).Return(nil)
 			},
 			expected: url,
@@ -134,7 +134,7 @@ func TestResolve(t *testing.T) {
 				hash.EXPECT().DecodeInt64WithError(gomock.Eq(code)).Return([]int64{id}, nil)
 			},
 			mockRepo: func(repo *mocks.MockLinkRepository) {
-				repo.EXPECT().GetLinkById(gomock.Any(), gomock.Eq(int64(id))).Return(&entity.Link{ID: id, SourceUrl: url, ExpiresAt: &past}, nil)
+				repo.EXPECT().GetLinkById(gomock.Any(), gomock.Eq(int64(id))).Return(&dto.LinkDTO{ID: id, SourceUrl: url, ExpiresAt: &past}, nil)
 				repo.EXPECT().UpdateLastRequested(gomock.Any(), gomock.Eq(int64(id))).Return(nil)
 			},
 			expectErr: serverrors.ErrURLExpired,
