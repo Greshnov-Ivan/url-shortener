@@ -15,7 +15,16 @@ type Config struct {
 }
 
 type ConnectionStrings struct {
-	UrlShortener string `yaml:"url_shortener" env-required:"true"`
+	UrlShortenerPg `yaml:"url_shortener_pg"`
+}
+
+type UrlShortenerPg struct {
+	User     string `yaml:"user" env:"POSTGRES_USER" env-required:"true"`
+	Password string `yaml:"password" env:"POSTGRES_PASSWORD" env-required:"true"`
+	HOST     string `yaml:"host" env:"POSTGRES_HOST" env-required:"true"`
+	PORT     uint   `yaml:"port" env:"POSTGRES_PORT" env-required:"true"`
+	DB       string `yaml:"db" env:"POSTGRES_DB" env-required:"true"`
+	SSLMode  string `yaml:"ssl_mode" env:"POSTGRES_SSLMODE" env-required:"true"`
 }
 
 type HTTPServer struct {
@@ -26,7 +35,7 @@ type HTTPServer struct {
 }
 
 type App struct {
-	ExpiredURLPath          string        `yaml:"expired_url_path" env-env-default:"/error/expired"`
+	ExpiredURLPath          string        `yaml:"expired_url_path" env-default:"/error/expired"`
 	GracefulShutdownTimeout time.Duration `yaml:"graceful_shutdown_timeout" env-default:"15s"`
 	HashIDConfiguration     `yaml:"hash_id_configuration"`
 }

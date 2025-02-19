@@ -28,7 +28,25 @@ cd url-shortener
 go mod tidy
 ```
 
-### Configure environment
+### Configure migrator
+
+- Copy the example .env file and update it:
+
+```sh
+cp .env.example .env
+```
+
+### Run database migrations
+
+Run migrator:
+
+```sh
+make migr-up
+```
+
+The configurator will apply migrations to your database
+
+### Configure server
 
 - Copy the example configuration file and update it with your database credentials and salt for hash_id_configuration:
 
@@ -42,27 +60,34 @@ cp config/local.yaml.example config/local.yaml
 export CONFIG_PATH=./config/local.yaml
 ```
 
-### Run database migrations
-
-- Set the DB connection string in the environment variables:
-
-```sh
-export DB_CONNECTION_STRING="host=localhost port=5432 dbname=url_shortener user=yourName password=yourPassword sslmode=disable"
-```
-
-- Run migrator:
-
-```sh
-make migrate-up
-```
-
 ### Start the server
 
 ```sh
-go run cmd/url-shortener/main.go
+make us-run
 ```
 
 The server should now be running on `http://localhost:8080`.
+
+### Run everything you need with Docker Compose
+
+To start the server along with the database and migrations, use:
+
+```sh
+docker-compose up --build
+```
+
+This will:
+- Start a PostgreSQL database container
+- Run the migrations
+- Launch the server
+
+Once everything is up, the server should be available at http://localhost:8080.
+
+To stop the containers, run:
+
+```sh
+docker-compose down
+```
 
 ## 📡 API Endpoints
 

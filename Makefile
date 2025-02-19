@@ -1,8 +1,6 @@
 MBUILD_TAGS=-tags 'no_mysql no_sqlite3 no_ydb'
 MBINARY=migrator
 USBINARY=url-shortener
-MIGRATIONS_PATH=migrations/
-MIGRATIONS_TABLE=migrations
 
 deps:
 	go mod tidy
@@ -13,31 +11,40 @@ build-m:
 build-us:
 	go build -o $(USBINARY) cmd/url-shortener/main.go
 
-# Применение миграций через бинарник
-migrate-up: build-m
-	./$(MBINARY) -connection-string="$(DB_CONNECTION_STRING)" -migrations-path=$(MIGRATIONS_PATH)
+us-run: build-us
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	./$(USBINARY)
 
-migrate-down: build-m
-	./$(MBINARY) -connection-string="$(DB_CONNECTION_STRING)" -migrations-path=$(MIGRATIONS_PATH) down
+migr-up: build-m
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	./$(MBINARY)
 
-# Создание новой миграции с именем NAME
+migr-down: build-m
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	export MIGRATIONS_DIRECTION='down'; \
+	./$(MBINARY)
+
 create-migration:
 ifndef NAME
-	$(error "name не задан. Используйте make create-migration NAME=название")
+	$(error "NAME is not set. Use make create-migration NAME=name")
 endif
-	goose -dir $(MIGRATIONS_PATH) create $(NAME) sql
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	goose -dir $$MIGRATIONS_PATH create $(NAME) sql
 
-# Применение миграций напрямую через goose
-migr-up:
-	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres "$(DB_CONNECTION_STRING)" up
+migr-g-up:
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	export CS_URL_SHORTENER="postgres://$$POSTGRES_USER:$$POSTGRES_PASSWORD@$$POSTGRES_HOST:$$POSTGRES_PORT/$$POSTGRES_DB?sslmode=disable"; \
+	goose -dir $$MIGRATIONS_PATH -table $$MIGRATIONS_TABLE) postgres $$CS_URL_SHORTENER up
 
-# Откат миграции через goose
-migr-down:
-	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres "$(DB_CONNECTION_STRING)" down
+migr-g-down:
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	export CS_URL_SHORTENER="postgres://$$POSTGRES_USER:$$POSTGRES_PASSWORD@$$POSTGRES_HOST:$$POSTGRES_PORT/$$POSTGRES_DB?sslmode=disable"; \
+	goose -dir $$MIGRATIONS_PATH -table $$MIGRATIONS_TABLE) postgres $$CS_URL_SHORTENER down
 
-# Статус миграций
 migr-status:
-	goose -dir $(MIGRATIONS_PATH) -table $(MIGRATIONS_TABLE) postgres "$(DB_CONNECTION_STRING)" status
+	@export $(shell sed 's/#.*//g' .env | xargs); \
+	export CS_URL_SHORTENER="postgres://$$POSTGRES_USER:$$POSTGRES_PASSWORD@$$POSTGRES_HOST:$$POSTGRES_PORT/$$POSTGRES_DB?sslmode=disable"; \
+	goose -dir $$MIGRATIONS_PATH -table $$MIGRATIONS_TABLE) postgres $$CS_URL_SHORTENER status
 
 clean-m:
 	rm -f $(MBINARY)
@@ -58,17 +65,20 @@ test:
 	go test -v ./...
 
 help:
-	@echo "Доступные команды:"
-	@echo "  make deps                            - Установить зависимости (go mod tidy)"
-	@echo "  make build-m                         - Собрать бинарник migrator"
-	@echo "  make build-us                        - Собрать бинарник url-shortener"
-	@echo "  make migrate-up                      - Применить миграции через бинарник migrator"
-	@echo "  make migrate-down                    - Откатить миграции через бинарник migrator"
-	@echo "  make create-migration NAME=название  - Создать новую миграцию"
-	@echo "  make migr-up                         - Применить миграции через goose"
-	@echo "  make migr-down                       - Откатить последнюю миграцию через goose"
-	@echo "  make migr-status                     - Проверить статус миграций"
-	@echo "  make clean-m                         - Удалить бинарный файл migrator"
-	@echo "  make clean-us                        - Удалить бинарный файл url-shortener"
-	@echo "  make lint                            - Запустить линтер (golangci-lint)"
-	@echo "  make test                            - Запустить тесты"
+	@echo "A .env file with the required environment variables must be present for most commands to work."
+	@echo "Available commands:"
+	@echo "  make deps                            - Install dependencies (go mod tidy)"
+	@echo "  make build-m                         - Build the migrator binary"
+	@echo "  make build-us                        - Build the url-shortener binary"
+	@echo "  make migr-up                         - Apply migrations using the migrator binary"
+	@echo "  make migr-down                       - Roll back migrations using the migrator binary"
+	@echo "  make create-migration NAME=name      - Create a new migration"
+	@echo "  make migr-g-up                       - Apply migrations using goose"
+	@echo "  make migr-g-down                     - Roll back the last migration using goose"
+	@echo "  make migr-g-status                   - Check migration status"
+	@echo "  make clean-m                         - Remove the migrator binary file"
+	@echo "  make clean-us                        - Remove the url-shortener binary file"
+	@echo "  make sw-init                         - Init swagger documentation"
+	@echo "  make lint                            - Run the linter (golangci-lint)"
+	@echo "  make g-mock-service                  - Generate mock_service"
+	@echo "  make test                            - Run tests"

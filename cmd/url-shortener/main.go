@@ -7,7 +7,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -26,7 +25,6 @@ const (
 func main() {
 	// init config: cleanenv
 	cfg := config.MustLoad()
-	fmt.Println(cfg)
 
 	// init logger: log/slog
 	log := setupLogger(cfg.Env)

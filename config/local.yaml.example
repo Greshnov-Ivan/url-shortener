@@ -1,17 +1,21 @@
 env: "local" # Possible values: local, dev, prod
 connection_strings:
-  # PostgreSQL connection string format: "postgres://user:password@host:port/dbname?sslmode=disable"
-  url_shortener: "your_postgres_connection_string"
+    url_shortener_pg:
+        user:     "your_user"      # Database username for authentication
+        password: "your_password"  # Password for the database user
+        host:     "localhost"      # Database host ('postgres' for a container, 'localhost' for local development)
+        port:     5432             # PostgreSQL port (default is 5432)
+        db:       "url_shortener"  # Name of the database to connect to
+        ssl_mode: "disable"        # SSL mode (can be 'disable', 'require', 'verify-ca', 'verify-full')
 http_server:
-  address: "localhost:8080" # Server address
-  timeout: 3s               # Request timeout
-  idle_timeout: 30s         # Idle connection timeout
-  read_header_timeout: 2s   # Timeout for reading request headers
+    address:             ":8080" # Server address
+    timeout:             3s      # Request timeout
+    idle_timeout:        30s     # Idle connection timeout
+    read_header_timeout: 2s      # Timeout for reading request headers
 app:
-  expired_url_path: "/error/expired" # Redirect path for expired URLs
-  graceful_shutdown_timeout: 10s     # Time to wait before forcing shutdown
-
-  hash_id_configuration:
-    salt: "your_salt_value"                 # Secret key for generating short URLs (keep it private!)
-    alphabet: "abcdefghijkABCDEFGHIJK12345" # Allowed characters for short links
-    min_hash_length: 5                      # Minimum length of generated hashes
+    expired_url_path:          "/error/expired" # Redirect path for expired URLs
+    graceful_shutdown_timeout: 10s              # Time to wait before forcing shutdown
+    hash_id_configuration:
+        salt:            "your_salt_value"             # Secret key for generating short URLs (keep it private!)
+        alphabet:        "abcdefghijkABCDEFGHIJK12345" # Allowed characters for short links
+        min_hash_length: 5                             # Minimum length of generated hashes

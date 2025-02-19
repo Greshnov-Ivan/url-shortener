@@ -2,44 +2,61 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"log"
+	"os"
+	"url-shortener/internal/lib/envparser"
 )
 
 func main() {
-	//TODO: config
-	var connectionString, migrationsPath, migrationsTable string
-
-	flag.StringVar(&connectionString, "connection-string", "", "connection string")
-	flag.StringVar(&migrationsPath, "migrations-path", "", "migrations path")
-	flag.StringVar(&migrationsTable, "migrations-table", "migrations", "migrations table")
-	flag.Parse()
-
-	if connectionString == "" {
-		log.Fatal("connection string is required")
+	connectionString, err := envparser.GetConnectionStringPg()
+	if err != nil {
+		log.Fatalf("error receiving the connection string: %v", err)
 	}
-	if migrationsPath == "" {
-		log.Fatal("migrations path is required")
+
+	migrationDirection, exists := os.LookupEnv("MIGRATIONS_DIRECTION")
+	if !exists {
+		migrationDirection = "up"
+	}
+
+	migrationsPath, exists := os.LookupEnv("MIGRATIONS_PATH")
+	if !exists {
+		migrationsPath = "migrations/"
+	}
+
+	migrationsTable, exists := os.LookupEnv("MIGRATIONS_TABLE")
+	if !exists {
+		migrationsTable = "migrations"
 	}
 
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
+	defer func() {
+		if err := db.Close(); err != nil {
 			log.Fatalf("failed to close database connection: %v", err)
 		}
-	}(db)
+	}()
 
 	goose.SetTableName(migrationsTable)
 
-	if err := goose.Up(db, migrationsPath); err != nil {
-		log.Fatalf("failed to run migrations: %v", err)
+	switch migrationDirection {
+	case "up":
+		log.Println("Applying migrations...")
+		if err := goose.Up(db, migrationsPath); err != nil {
+			log.Fatalf("failed to apply migrations: %v", err)
+		}
+		log.Println("Migrations applied successfully.")
+	case "down":
+		log.Println("Rolling back the last migration...")
+		if err := goose.Down(db, migrationsPath); err != nil {
+			log.Fatalf("failed to rollback migration: %v", err)
+		}
+		log.Println("Migration rollback completed.")
+	default:
+		log.Fatalf("Invalid migration direction: %s. Use 'up' or 'down'.", migrationDirection)
 	}
 
 	log.Println("migrations successfully applied")

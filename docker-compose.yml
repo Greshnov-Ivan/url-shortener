@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    container_name: postgres
+    ports:
+      - ${L_POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}
+    volumes:
+      - url-shortener-storage:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+
+  migrator:
+    build:
+      context: .
+      dockerfile: migrator.Dockerfile
+      args:
+        BUILD_TAGS: "no_mysql no_sqlite3 no_ydb"
+    depends_on:
+      - postgres
+    env_file: .env
+    volumes:
+      - ./migrations:/migrations
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - migrator
+    env_file: .env
+    volumes:
+      - ./config:/config:ro
+    ports:
+      - "8080:8080"
+
+volumes:
+  url-shortener-storage:
+    name: "url-shortener-storage"

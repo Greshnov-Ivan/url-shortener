@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/speps/go-hashids/v2"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"log/slog"
@@ -35,7 +36,16 @@ type App struct {
 
 func NewApp(cfg config.Config, log *slog.Logger) (*App, error) {
 	// open connect to db
-	db, err := sql.Open("postgres", cfg.ConnectionStrings.UrlShortener)
+	connStr := fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		cfg.ConnectionStrings.User,
+		cfg.ConnectionStrings.Password,
+		cfg.ConnectionStrings.HOST,
+		cfg.ConnectionStrings.PORT,
+		cfg.ConnectionStrings.DB,
+		cfg.ConnectionStrings.SSLMode,
+	)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Error("failed to connect to database", slog.Any("error", err))
 		return nil, err
