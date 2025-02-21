@@ -12,8 +12,9 @@
 
 ### Prerequisites
 
-- Go 1.18+
-- PostgreSQL (or another supported database)
+- Go 1.23+
+- PostgreSQL (if you don't use docker-compose)
+- Docker (if you use docker-compose)
 
 ### Clone the repository
 
