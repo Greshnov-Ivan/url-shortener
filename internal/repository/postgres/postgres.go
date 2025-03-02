@@ -37,28 +37,32 @@ func (r *Repository) CreateLink(ctx context.Context, sourceUrl string, expiresAt
 
 func (r *Repository) GetLinkBySourceUrl(ctx context.Context, sourceUrl string) (*dto.LinkDTO, error) {
 	query := "SELECT id, source_url, expires_at, created_at, last_requested_at FROM links WHERE source_url = $1"
-	link := &dto.LinkDTO{}
-	err := r.db.QueryRowContext(ctx, query, sourceUrl).Scan(&link.ID, &link.SourceUrl, &link.ExpiresAt, &link.CreatedAt, &link.LastRequestedAt)
+	link := dto.LinkDTO{}
+	err := r.db.
+		QueryRowContext(ctx, query, sourceUrl).
+		Scan(&link.ID, &link.SourceUrl, &link.ExpiresAt, &link.CreatedAt, &link.LastRequestedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, reperrors.ErrLinkNotFound
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get link by source URL: %w", err)
 	}
-	return link, nil
+	return &link, nil
 }
 
 func (r *Repository) GetLinkById(ctx context.Context, id int64) (*dto.LinkDTO, error) {
 	query := "SELECT id, source_url, expires_at, created_at, last_requested_at FROM links WHERE id = $1"
-	link := &dto.LinkDTO{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&link.ID, &link.SourceUrl, &link.ExpiresAt, &link.CreatedAt, &link.LastRequestedAt)
+	link := dto.LinkDTO{}
+	err := r.db.
+		QueryRowContext(ctx, query, id).
+		Scan(&link.ID, &link.SourceUrl, &link.ExpiresAt, &link.CreatedAt, &link.LastRequestedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, reperrors.ErrLinkNotFound
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get link by ID: %w", err)
 	}
-	return link, nil
+	return &link, nil
 }
 
 func (r *Repository) UpdateLastRequested(ctx context.Context, id int64) error {
